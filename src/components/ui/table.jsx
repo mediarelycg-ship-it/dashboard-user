@@ -30,7 +30,7 @@ function TableHead({ className, ...props }) {
   return (
     <th
       data-slot="table-head"
-      className={cn('h-11 px-3 text-left align-middle text-xs font-semibold tracking-wide whitespace-nowrap text-muted-foreground uppercase', className)}
+      className={cn('h-11 bg-primary px-3 text-left align-middle text-xs font-semibold tracking-wide whitespace-nowrap text-primary-foreground uppercase first:rounded-tl-xl last:rounded-tr-xl', className)}
       {...props}
     />
   )

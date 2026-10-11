@@ -1,5 +1,5 @@
 import { CheckCircle2 } from 'lucide-react'
-import Logo from '@/components/Logo'
+import Logo, { Brand, COMPANY_NAME } from '@/components/Logo'
 
 const highlights = ['Daftar dengan email atau akun Google', 'Akses dibuka setelah disetujui master admin', 'Satu dashboard untuk semua layanan']
 
@@ -14,12 +14,12 @@ export default function AuthShell({ title, description, children }) {
           <div className="flex size-11 items-center justify-center rounded-xl bg-white">
             <Logo className="h-7" />
           </div>
-          <span className="text-lg font-semibold tracking-wide">RELY Consulting Goup</span>
+          <span className="text-lg leading-tight font-semibold tracking-tight">{COMPANY_NAME}</span>
         </div>
 
         <div className="relative max-w-md">
           <h2 className="text-4xl leading-tight font-semibold">
-            Member Area <span className="text-teal">RELY Consulting Group</span>
+            Member Area<span className="block text-teal">{COMPANY_NAME}</span>
           </h2>
           <p className="mt-4 text-white/70">Kelola akun dan akses member Anda dengan mudah dan aman.</p>
           <ul className="mt-8 space-y-3 text-sm text-white/85">
@@ -32,15 +32,12 @@ export default function AuthShell({ title, description, children }) {
           </ul>
         </div>
 
-        <p className="relative text-xs text-white/50">&copy; {new Date().getFullYear()} RELY. All rights reserved.</p>
+        <p className="relative text-xs text-white/50">&copy; {new Date().getFullYear()} {COMPANY_NAME}. All rights reserved.</p>
       </aside>
 
       <main className="flex items-center justify-center bg-card p-6 sm:p-10">
         <div className="w-full max-w-sm">
-          <div className="mb-8 flex items-center gap-2.5 lg:hidden">
-            <Logo className="h-8" />
-            <span className="font-semibold">RELY Consulting Group Member Area</span>
-          </div>
+          <Brand size="md" className="mb-8 lg:hidden" />
           <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
           <p className="mt-1.5 mb-7 text-sm text-muted-foreground">{description}</p>
           {children}

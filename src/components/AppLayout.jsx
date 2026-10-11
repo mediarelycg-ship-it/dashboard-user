@@ -1,117 +1,199 @@
-import { LayoutDashboard, LogOut, Users } from 'lucide-react'
-import { Link, NavLink, Outlet } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Link, Outlet, useLocation } from 'react-router-dom'
+import { ChevronsUpDown, LayoutDashboard, LogOut, UserCheck, UserCircle } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
-import { cn } from '@/lib/utils'
-import Logo from '@/components/Logo'
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarRail,
+  SidebarTrigger,
+  useSidebar,
+} from '@/components/ui/sidebar'
+import { Separator } from '@/components/ui/separator'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
-const navItems = [
-  { to: '/', label: 'Beranda', icon: LayoutDashboard, end: true, roles: null },
-  { to: '/members', label: 'Member Subscription', icon: Users, roles: ['master_admin'] },
+const navGroups = [
+  {
+    label: 'Utama',
+    items: [
+      { to: '/', label: 'Beranda', icon: LayoutDashboard, roles: null },
+      { to: '/profile', label: 'Profil', icon: UserCircle, roles: null },
+    ],
+  },
+  {
+    label: 'Manajemen',
+    items: [{ to: '/members', label: 'Member Subscription', icon: UserCheck, roles: ['master_admin'] }],
+  },
 ]
+
+const allItems = navGroups.flatMap((g) => g.items)
 
 const ROLE_LABEL = { master_admin: 'Master Admin', member: 'Member' }
 
-function Avatar({ name }) {
+const initials = (name = '') =>
+  name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((n) => n[0]?.toUpperCase())
+    .join('') || 'U'
+
+function isActive(pathname, path) {
+  if (path === '/') return pathname === '/'
+  return pathname.startsWith(path)
+}
+
+function UserMenu() {
+  const { user, logout } = useAuth()
+  const { isMobile, setOpenMobile } = useSidebar()
+
   return (
-    <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-      {(name || '?').trim().charAt(0).toUpperCase()}
-    </span>
+    <SidebarMenu>
+      <SidebarMenuItem>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <SidebarMenuButton size="lg" className="data-[state=open]:bg-sidebar-accent">
+              <Avatar className="size-8 rounded-lg">
+                <AvatarImage src={user?.picture || undefined} alt={user?.name} referrerPolicy="no-referrer" />
+                <AvatarFallback className="rounded-lg bg-primary text-xs font-semibold text-primary-foreground">
+                  {initials(user?.name)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-medium">{user?.name}</span>
+                <span className="truncate text-xs text-sidebar-foreground/60">{user?.email}</span>
+              </div>
+              <ChevronsUpDown className="ml-auto size-4 text-sidebar-foreground/60" />
+            </SidebarMenuButton>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            className="min-w-56 rounded-lg"
+            side={isMobile ? 'bottom' : 'right'}
+            align="end"
+            sideOffset={4}
+          >
+            <DropdownMenuLabel className="font-normal">
+              <p className="truncate text-sm font-medium">{user?.name}</p>
+              <p className="truncate text-xs text-muted-foreground">{ROLE_LABEL[user?.role]}</p>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild onClick={() => setOpenMobile(false)}>
+              <Link to="/profile">
+                <UserCircle /> Profil Saya
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem variant="destructive" onClick={logout}>
+              <LogOut /> Keluar
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </SidebarMenuItem>
+    </SidebarMenu>
   )
 }
 
+function NavLinks() {
+  const { user } = useAuth()
+  const { pathname } = useLocation()
+  const { setOpenMobile } = useSidebar()
+
+  return navGroups.map((group) => {
+    const items = group.items.filter(({ roles }) => !roles || roles.includes(user?.role))
+    if (items.length === 0) return null
+    return (
+      <SidebarGroup key={group.label}>
+        <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            {items.map(({ to, label, icon: Icon }) => (
+              <SidebarMenuItem key={to}>
+                <SidebarMenuButton asChild isActive={isActive(pathname, to)} tooltip={label}>
+                  <Link to={to} onClick={() => setOpenMobile(false)}>
+                    <Icon />
+                    <span>{label}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+    )
+  })
+}
+
 export default function AppLayout() {
-  const { user, logout } = useAuth()
-  const items = navItems.filter(({ roles }) => !roles || roles.includes(user?.role))
+  const { user, refreshStatus } = useAuth()
+  const { pathname } = useLocation()
+  const isMember = user?.role === 'member'
+
+  // Ambil nama/foto terbaru (mis. foto Google yang baru tersimpan di server)
+  useEffect(() => {
+    if (isMember) refreshStatus().catch(() => {})
+  }, [isMember, refreshStatus])
+
+  const current = allItems
+    .filter((i) => isActive(pathname, i.to))
+    .sort((a, b) => b.to.length - a.to.length)[0]
 
   return (
-    <div className="flex min-h-screen">
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r bg-card md:flex">
-        <Link to="/" className="flex items-center gap-3 px-6 py-6">
-          <Logo className="h-8" />
-          <div className="leading-tight">
-            <p className="font-semibold">RELY</p>
-            <p className="text-xs text-muted-foreground">Member Area</p>
-          </div>
-        </Link>
+    <SidebarProvider>
+      <Sidebar collapsible="icon">
+        <SidebarHeader>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton size="lg" asChild>
+                <Link to="/">
+                  <img src="/logo-r.png" alt="RELY" className="h-8 w-auto shrink-0" />
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">RELY Member</span>
+                    <span className="truncate text-xs text-sidebar-foreground/60">Consulting Group</span>
+                  </div>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarHeader>
+        <SidebarContent>
+          <NavLinks />
+        </SidebarContent>
+        <SidebarFooter>
+          <UserMenu />
+        </SidebarFooter>
+        <SidebarRail />
+      </Sidebar>
 
-        <nav className="flex-1 space-y-1 px-3">
-          <p className="px-3 pb-2 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">Menu</p>
-          {items.map(({ to, label, icon: Icon, end }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={end}
-              className={({ isActive }) =>
-                cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                  isActive ? 'bg-accent text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                )
-              }
-            >
-              <Icon className="size-[18px]" />
-              {label}
-            </NavLink>
-          ))}
-        </nav>
-
-        <div className="m-3 rounded-xl bg-muted p-3">
-          <div className="flex items-center gap-3">
-            <Avatar name={user?.name} />
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium">{user?.name}</p>
-              <p className="truncate text-xs text-muted-foreground">{ROLE_LABEL[user?.role] || user?.email}</p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={logout}
-            className="mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border bg-card py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-destructive"
-          >
-            <LogOut className="size-4" />
-            Keluar
-          </button>
-        </div>
-      </aside>
-
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b bg-card px-4 py-3 md:hidden">
-          <Link to="/" className="flex items-center gap-2 font-semibold">
-            <Logo className="h-7" />
-            RELY
-          </Link>
-          <button
-            type="button"
-            onClick={logout}
-            className="flex cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm text-muted-foreground"
-          >
-            <LogOut className="size-4" />
-            Keluar
-          </button>
+      <SidebarInset className="min-w-0">
+        <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b bg-background/80 px-4 backdrop-blur">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
+          <h1 className="text-sm font-medium text-muted-foreground">{current?.label || 'Member Area'}</h1>
         </header>
-
-        {items.length > 1 && (
-          <nav className="flex gap-2 overflow-x-auto border-b bg-card px-4 py-2 md:hidden">
-            {items.map(({ to, label, end }) => (
-              <NavLink
-                key={to}
-                to={to}
-                end={end}
-                className={({ isActive }) =>
-                  cn('shrink-0 rounded-lg px-3 py-1.5 text-sm', isActive ? 'bg-accent font-medium text-primary' : 'text-muted-foreground')
-                }
-              >
-                {label}
-              </NavLink>
-            ))}
-          </nav>
-        )}
-
-        <main className="flex-1 p-4 md:p-8">
+        <main className="flex-1 p-4 md:p-6">
           <div className="mx-auto w-full max-w-6xl">
             <Outlet />
           </div>
         </main>
-      </div>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   )
 }

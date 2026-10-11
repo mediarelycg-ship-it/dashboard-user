@@ -29,19 +29,24 @@ export function AuthProvider({ children }) {
     setUser(null)
   }, [])
 
-  // Ambil ulang status akun, misalnya setelah master admin mengaktifkan akun
-  const refreshStatus = useCallback(async () => {
-    const me = await api.getMe()
+  // Samakan data user yang tersimpan (nama, foto, status) dengan data member terbaru
+  const syncMember = useCallback((me) => {
     setUser((prev) => {
-      const merged = { ...prev, name: me.name, status: me.status }
+      const merged = { ...prev, name: me.name, picture: me.picture || null, status: me.status }
       localStorage.setItem('user', JSON.stringify(merged))
       return merged
     })
-    return me
   }, [])
 
+  // Ambil ulang status akun, misalnya setelah master admin mengaktifkan akun
+  const refreshStatus = useCallback(async () => {
+    const me = await api.getMe()
+    syncMember(me)
+    return me
+  }, [syncMember])
+
   return (
-    <AuthContext.Provider value={{ user, token, saveSession, logout, refreshStatus }}>
+    <AuthContext.Provider value={{ user, token, saveSession, logout, refreshStatus, syncMember }}>
       {children}
     </AuthContext.Provider>
   )

@@ -37,6 +37,13 @@ export const api = {
 
   // Member (sudah login)
   getMe: () => request('/members/me'),
+  updateMe: (data) =>
+    request('/members/me', { method: 'PUT', body: JSON.stringify(data) }),
+
+  // Profil master admin (endpoint admin yang sudah ada)
+  getAdminProfile: () => request('/auth/me'),
+  updateAdminProfile: (data) =>
+    request('/auth/profile', { method: 'PUT', body: JSON.stringify(data) }),
 
   // Manajemen member (master admin)
   getMembers: ({ status = '', page = 1, limit = 10 } = {}) => {

@@ -1,13 +1,10 @@
 import { useEffect, useState } from 'react'
-import { CalendarCheck, CheckCircle2, ShieldCheck, UserCheck, Users } from 'lucide-react'
+import { Users } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { api } from '@/api/client'
 import { useAuth } from '@/contexts/auth-context'
-import { formatDateTime } from '@/lib/format'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import StatCard from '@/components/StatCard'
+import VirtualCard from '@/components/VirtualCard'
 
 function Hero({ name, children }) {
   return (
@@ -55,39 +52,12 @@ export default function HomePage() {
   return (
     <div className="space-y-6">
       <Hero name={member?.name || user?.name}>
-        <p className="mt-2 max-w-xl text-white/70">Akun Anda sudah aktif dan dapat mengakses dashboard.</p>
+        <p className="mt-2 max-w-xl text-white/70">Berikut virtual card member Anda.</p>
       </Hero>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Status akun" value="Aktif" icon={ShieldCheck} tone="teal" />
-        <StatCard label="Diaktifkan oleh" value={member?.activatedBy?.name || '-'} icon={UserCheck} tone="primary" />
-        <StatCard label="Tanggal aktivasi" value={formatDateTime(member?.activatedAt)} icon={CalendarCheck} tone="navy" />
-      </div>
+      {error && <p className="text-sm text-destructive">{error}</p>}
 
-      <Card className="max-w-xl">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CheckCircle2 className="size-5 text-success" />
-            Status akun
-          </CardTitle>
-          <CardDescription>Ringkasan akses akun Anda.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3 text-sm">
-          {error && <p className="text-destructive">{error}</p>}
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Status</span>
-            <Badge variant="success">Aktif</Badge>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Diaktifkan oleh</span>
-            <span>{member?.activatedBy?.name || '-'}</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Tanggal aktivasi</span>
-            <span>{formatDateTime(member?.activatedAt)}</span>
-          </div>
-        </CardContent>
-      </Card>
+      <VirtualCard name={member?.name || user?.name} cardNumber={member?.cardNumber} />
     </div>
   )
 }

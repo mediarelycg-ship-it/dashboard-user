@@ -35,7 +35,7 @@ export default function PendingApprovalPage() {
       <h1 className="mt-6 text-3xl font-semibold tracking-tight">Menunggu Persetujuan</h1>
       <p className="mt-3 max-w-md text-muted-foreground">
         Halo{user?.name ? `, ${user.name}` : ''}. Akun Anda{user?.email ? ` (${user.email})` : ''} sudah terdaftar.
-        Dashboard akan terbuka setelah master admin mengaktifkan akun Anda.
+        Dashboard akan terbuka setelah Pengurus utama mengaktifkan akun Anda.
       </p>
 
       {message && <p className="mt-4 text-sm text-muted-foreground">{message}</p>}

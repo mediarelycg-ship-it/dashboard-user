@@ -5,6 +5,7 @@ import HomePage from '@/pages/HomePage'
 import LoginPage from '@/pages/LoginPage'
 import MembersPage from '@/pages/MembersPage'
 import PendingApprovalPage from '@/pages/PendingApprovalPage'
+import ProfilePage from '@/pages/ProfilePage'
 import RegisterPage from '@/pages/RegisterPage'
 
 // Halaman login/register tidak bisa diakses saat sudah login
@@ -40,6 +41,12 @@ export default function App() {
 
       <Route element={<RequireAuth><AppShell /></RequireAuth>}>
         <Route index element={<HomePage />} />
+        <Route
+          path="profile"
+          element={
+            <ProfilePage />
+          }
+        />
         <Route
           path="members"
           element={
