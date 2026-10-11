@@ -1,16 +1,19 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Bot, Package as PackageIcon, Pencil, Plus, Trash2 } from 'lucide-react'
 import { api } from '@/api/client'
 import { formatRupiah } from '@/lib/format'
-import { typeLabel } from '@/lib/packages'
+import { PACKAGE_TYPES, typeLabel } from '@/lib/packages'
 import { showConfirm, showError, showLoading, closeLoading, showSuccess } from '@/utils/alert'
 import PageHeader from '@/components/PageHeader'
+import FilterBar from '@/components/FilterBar'
 import { LoadingState, EmptyState } from '@/components/common'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+
+const NO_FILTER = { q: '', type: 'all', status: 'all', members: 'all' }
 
 export default function PackagesPage() {
   const [reloadKey, setReloadKey] = useState(0)
@@ -18,7 +21,22 @@ export default function PackagesPage() {
   const [syncing, setSyncing] = useState(false)
 
   const loading = state.key !== reloadKey
-  const packages = loading ? [] : state.packages
+  const packages = useMemo(() => (loading ? [] : state.packages), [loading, state.packages])
+
+  const [filters, setFilters] = useState(NO_FILTER)
+  const patchFilters = (p) => setFilters((prev) => ({ ...prev, ...p }))
+  const isFiltered = JSON.stringify(filters) !== JSON.stringify(NO_FILTER)
+
+  const visible = useMemo(() => {
+    const q = filters.q.trim().toLowerCase()
+    return packages.filter(
+      (p) =>
+        (!q || p.name.toLowerCase().includes(q) || p.slug.toLowerCase().includes(q)) &&
+        (filters.type === 'all' || p.type === filters.type) &&
+        (filters.status === 'all' || (filters.status === 'active') === p.isActive) &&
+        (filters.members === 'all' || (filters.members === 'used') === p.memberCount > 0)
+    )
+  }, [packages, filters])
 
   useEffect(() => {
     let ignore = false
@@ -84,11 +102,51 @@ export default function PackagesPage() {
         }
       />
 
+      <FilterBar
+        search={{ value: filters.q, onChange: (q) => patchFilters({ q }), placeholder: 'Cari nama paket...' }}
+        selects={[
+          {
+            id: 'type',
+            label: 'Tipe',
+            value: filters.type,
+            onChange: (type) => patchFilters({ type }),
+            options: [{ value: 'all', label: 'Semua tipe' }, ...PACKAGE_TYPES],
+          },
+          {
+            id: 'status',
+            label: 'Status',
+            value: filters.status,
+            onChange: (status) => patchFilters({ status }),
+            options: [
+              { value: 'all', label: 'Semua status' },
+              { value: 'active', label: 'Aktif' },
+              { value: 'inactive', label: 'Nonaktif' },
+            ],
+          },
+          {
+            id: 'members',
+            label: 'Pemakaian',
+            value: filters.members,
+            onChange: (members) => patchFilters({ members }),
+            options: [
+              { value: 'all', label: 'Semua pemakaian' },
+              { value: 'used', label: 'Dipakai member' },
+              { value: 'unused', label: 'Belum dipakai' },
+            ],
+          },
+        ]}
+        active={isFiltered}
+        onReset={() => setFilters(NO_FILTER)}
+        summary={!loading && packages.length > 0 ? `${visible.length} dari ${packages.length} paket` : undefined}
+      />
+
       <Card className="overflow-hidden py-0">
         {loading ? (
           <LoadingState />
         ) : packages.length === 0 ? (
           <EmptyState icon={PackageIcon} title="Belum ada paket" description="Tambahkan paket atau jalankan seeder paket." />
+        ) : visible.length === 0 ? (
+          <EmptyState icon={PackageIcon} title="Tidak ada paket yang cocok" description="Ubah atau reset filter." />
         ) : (
           <Table>
             <TableHeader>
@@ -105,7 +163,7 @@ export default function PackagesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {packages.map((pkg) => (
+              {visible.map((pkg) => (
                 <TableRow key={pkg.id}>
                   <TableCell className="px-4">
                     <p className="font-medium">{pkg.name}</p>

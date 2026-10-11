@@ -32,7 +32,13 @@ export function AuthProvider({ children }) {
   // Samakan data user yang tersimpan (nama, foto, status) dengan data member terbaru
   const syncMember = useCallback((me) => {
     setUser((prev) => {
-      const merged = { ...prev, name: me.name, picture: me.picture || null, status: me.status }
+      const merged = {
+        ...prev,
+        name: me.name,
+        picture: me.picture || null,
+        status: me.status,
+        subscribed: Boolean(me.package),
+      }
       localStorage.setItem('user', JSON.stringify(merged))
       return merged
     })

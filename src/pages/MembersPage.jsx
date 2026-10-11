@@ -6,6 +6,7 @@ import { formatDateTime } from '@/lib/format'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import FilterBar from '@/components/FilterBar'
 import StatCard from '@/components/StatCard'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
@@ -17,6 +18,8 @@ const FILTERS = [
 
 const EMPTY_DATA = { members: [], total: 0, page: 1, totalPages: 1, counts: { pending: 0, active: 0 } }
 
+const NO_FILTER = { q: '', packageId: 'all', from: '', to: '' }
+
 export default function MembersPage() {
   const [status, setStatus] = useState('pending')
   const [page, setPage] = useState(1)
@@ -25,12 +28,33 @@ export default function MembersPage() {
   const [loading, setLoading] = useState(true)
   const [actionId, setActionId] = useState(null)
   const [error, setError] = useState('')
+  const [filters, setFilters] = useState(NO_FILTER)
+  const [packages, setPackages] = useState([])
+  const filterKey = JSON.stringify(filters)
+  const isFiltered = filterKey !== JSON.stringify(NO_FILTER)
+
+  useEffect(() => {
+    api.getPackages().then((list) => setPackages(Array.isArray(list) ? list : [])).catch(() => {})
+  }, [])
+
+  const patchFilters = (patch) => {
+    setLoading(true)
+    setPage(1)
+    setFilters((prev) => ({ ...prev, ...patch }))
+  }
 
   // Setiap perubahan filter, halaman, atau reloadKey memicu pengambilan data terbaru
   useEffect(() => {
     let ignore = false
     api
-      .getMembers({ status, page })
+      .getMembers({
+        status,
+        page,
+        q: filters.q.trim(),
+        packageId: filters.packageId === 'all' ? '' : filters.packageId,
+        from: filters.from,
+        to: filters.to,
+      })
       .then((result) => {
         if (!ignore) setData(result)
       })
@@ -43,7 +67,9 @@ export default function MembersPage() {
     return () => {
       ignore = true
     }
-  }, [status, page, reloadKey])
+    // filters sudah terwakili oleh filterKey
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, page, reloadKey, filterKey])
 
   const reload = () => {
     setLoading(true)
@@ -117,6 +143,28 @@ export default function MembersPage() {
         ))}
       </div>
 
+      <FilterBar
+        search={{ value: filters.q, onChange: (q) => patchFilters({ q }), placeholder: 'Cari nama, email, atau no. kartu...' }}
+        selects={[
+          {
+            id: 'package',
+            label: 'Paket',
+            value: filters.packageId,
+            onChange: (packageId) => patchFilters({ packageId }),
+            options: [
+              { value: 'all', label: 'Semua paket' },
+              { value: 'none', label: 'Belum punya paket' },
+              ...packages.map((p) => ({ value: String(p.id), label: p.name })),
+            ],
+          },
+        ]}
+        dates={{ label: 'Terdaftar', from: filters.from, to: filters.to, onChange: patchFilters }}
+        active={isFiltered}
+        onReset={() => patchFilters(NO_FILTER)}
+        summary={!loading ? `${data.total} member${isFiltered || status ? ' sesuai filter' : ''}` : undefined}
+        className="mb-0"
+      />
+
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       <Card className="py-0">
@@ -138,7 +186,7 @@ export default function MembersPage() {
               {data.members.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
-                    {loading ? 'Memuat data...' : 'Belum ada member.'}
+                    {loading ? 'Memuat data...' : isFiltered ? 'Tidak ada member yang cocok dengan filter.' : 'Belum ada member.'}
                   </TableCell>
                 </TableRow>
               )}

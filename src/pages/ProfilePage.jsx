@@ -6,6 +6,7 @@ import { formatDateTime } from '@/lib/format'
 import Avatar from '@/components/Avatar'
 import AdminProfile from '@/pages/AdminProfile'
 import MyPackageCard from '@/components/MyPackageCard'
+import MyPackageHistory from '@/components/MyPackageHistory'
 import StatCard from '@/components/StatCard'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -99,6 +100,7 @@ function MemberProfile() {
       </div>
 
       <MyPackageCard />
+      <MyPackageHistory />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>

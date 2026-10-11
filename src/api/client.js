@@ -20,7 +20,8 @@ async function request(path, options = {}) {
   }
 
   if (!res.ok) {
-    throw new Error(data.error || 'Terjadi kesalahan, coba lagi.')
+    // code (mis. NOT_SUBSCRIBED, PENDING_APPROVAL) membantu UI memilih tampilan yang tepat
+    throw Object.assign(new Error(data.error || 'Terjadi kesalahan, coba lagi.'), { code: data.code })
   }
 
   return data
@@ -45,8 +46,22 @@ export const api = {
   updateAdminProfile: (data) =>
     request('/auth/profile', { method: 'PUT', body: JSON.stringify(data) }),
 
+  // Agent / chatbot (hanya member aktif yang sudah berlangganan)
+  getAgentSessions: () => request('/members/agent/sessions?limit=50'),
+  createAgentSession: () => request('/members/agent/sessions', { method: 'POST' }),
+  getAgentSession: (sessionId) => request(`/members/agent/sessions/${sessionId}`),
+  sendAgentMessage: (sessionId, message) =>
+    request(`/members/agent/sessions/${sessionId}/messages`, { method: 'POST', body: JSON.stringify({ message }) }),
+
   // Paket milik member yang sedang login (hanya akun aktif)
   getMyPackage: () => request('/members/me/package'),
+  getMyPackageHistory: ({ from, to } = {}) => {
+    const query = new URLSearchParams()
+    if (from) query.set('from', from)
+    if (to) query.set('to', to)
+    const qs = query.toString()
+    return request(`/members/me/package-history${qs ? `?${qs}` : ''}`)
+  },
 
   getDashboard: (range = '7d') => request(`/admin/dashboard?range=${range}`),
 
@@ -67,9 +82,12 @@ export const api = {
     request(`/admin/members/${id}/package`, { method: 'PUT', body: JSON.stringify(data) }),
 
   // Manajemen member (master admin)
-  getMembers: ({ status = '', page = 1, limit = 10 } = {}) => {
+  getMembers: ({ status = '', page = 1, limit = 10, q, packageId, from, to } = {}) => {
     const query = new URLSearchParams({ page, limit })
     if (status) query.set('status', status)
+    for (const [key, value] of Object.entries({ q, packageId, from, to })) {
+      if (value) query.set(key, value)
+    }
     return request(`/admin/members?${query.toString()}`)
   },
   activateMember: (id) =>

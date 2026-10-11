@@ -7,6 +7,7 @@ import MembersPage from '@/pages/MembersPage'
 import MemberDetailPage from '@/pages/MemberDetailPage'
 import PackagesPage from '@/pages/PackagesPage'
 import PackageFormPage from '@/pages/PackageFormPage'
+import AgentPage from '@/pages/AgentPage'
 import PendingApprovalPage from '@/pages/PendingApprovalPage'
 import ProfilePage from '@/pages/ProfilePage'
 import RegisterPage from '@/pages/RegisterPage'
@@ -44,6 +45,7 @@ export default function App() {
 
       <Route element={<RequireAuth><AppShell /></RequireAuth>}>
         <Route index element={<HomePage />} />
+        <Route path="agent" element={<AgentPage />} />
         <Route
           path="profile"
           element={

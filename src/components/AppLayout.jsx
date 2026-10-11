@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
-import { ChevronsUpDown, LayoutDashboard, LogOut, Package, UserCheck, UserCircle } from 'lucide-react'
+import { Bot, ChevronsUpDown, LayoutDashboard, Lock, LogOut, Package, UserCheck, UserCircle } from 'lucide-react'
+import { toast } from 'sonner'
 import { useAuth } from '@/contexts/auth-context'
 import {
   Sidebar,
@@ -36,6 +37,7 @@ const navGroups = [
     items: [
       { to: '/', label: 'Beranda', icon: LayoutDashboard, roles: null },
       { to: '/profile', label: 'Profil', icon: UserCircle, roles: null },
+      { to: '/agent', label: 'Agent', icon: Bot, roles: ['member'], requiresSubscription: true },
     ],
   },
   {
@@ -127,16 +129,42 @@ function NavLinks() {
         <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>
-            {items.map(({ to, label, icon: Icon }) => (
-              <SidebarMenuItem key={to}>
-                <SidebarMenuButton asChild isActive={isActive(pathname, to)} tooltip={label}>
-                  <Link to={to} onClick={() => setOpenMobile(false)}>
-                    <Icon />
-                    <span>{label}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
+            {items.map(({ to, label, icon: Icon, requiresSubscription }) => {
+              // Fitur langganan (Agent): tampil tapi nonaktif untuk member yang belum berlangganan
+              if (requiresSubscription && !user?.subscribed) {
+                return (
+                  <SidebarMenuItem key={to}>
+                    <SidebarMenuButton
+                      tooltip={`${label} (khusus member berlangganan)`}
+                      data-locked="true"
+                      aria-label={`${label} (terkunci, khusus member berlangganan)`}
+                      className="cursor-not-allowed opacity-60 hover:bg-transparent hover:text-sidebar-foreground"
+                      onClick={() => {
+                        setOpenMobile(false)
+                        toast.warning(`Fitur ${label} belum aktif`, {
+                          description:
+                            'Fitur ini hanya untuk member yang sudah berlangganan paket. Hubungi admin untuk mengaktifkan langganan Anda.',
+                        })
+                      }}
+                    >
+                      <Icon />
+                      <span>{label}</span>
+                      <Lock className="ml-auto size-3.5" />
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              }
+              return (
+                <SidebarMenuItem key={to}>
+                  <SidebarMenuButton asChild isActive={isActive(pathname, to)} tooltip={label}>
+                    <Link to={to} onClick={() => setOpenMobile(false)}>
+                      <Icon />
+                      <span>{label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )
+            })}
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarGroup>

@@ -6,6 +6,23 @@ import { BILLING_PLANS, billingLabel, planPrice, typeLabel } from '@/lib/package
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
+// Harga sesuai billing plan member. Promo & tahunan menampilkan harga pembanding yang dicoret + hemat.
+//   promo  : harga normal bulanan dicoret -> harga promo
+//   annual : 12x harga bulanan yang berlaku dicoret -> harga tahunan
+function priceInfo(pkg) {
+  const plan = BILLING_PLANS.find((b) => b.value === pkg.billingPlan)
+  const current = planPrice(pkg, pkg.billingPlan)
+  const info = { current, suffix: plan?.suffix || '', original: null, saving: null, badge: null }
+
+  if (pkg.billingPlan === 'promo' && pkg.promoSaving > 0) {
+    return { ...info, original: pkg.monthlyPrice, saving: pkg.promoSaving, badge: pkg.promoLabel }
+  }
+  if (pkg.billingPlan === 'annual' && pkg.annualSaving > 0) {
+    return { ...info, original: current + pkg.annualSaving, saving: pkg.annualSaving, badge: 'Tahunan' }
+  }
+  return info
+}
+
 function groupCoverage(coverage = []) {
   const groups = []
   for (const item of coverage) {
@@ -47,7 +64,7 @@ export default function MyPackageCard() {
     )
   }
 
-  const plan = BILLING_PLANS.find((b) => b.value === pkg.billingPlan)
+  const price = priceInfo(pkg)
   const benefits = [
     ['Advisory', `${pkg.advisoryHours} jam / bulan`],
     ['Support', pkg.support || '-'],
@@ -63,10 +80,27 @@ export default function MyPackageCard() {
           <PackageIcon className="size-5" /> {pkg.name}
           <Badge variant="secondary">{typeLabel(pkg.type)}</Badge>
         </CardTitle>
-        <CardDescription>
-          {billingLabel(pkg.billingPlan)} · {formatRupiah(planPrice(pkg, pkg.billingPlan))}
-          {plan?.suffix} (belum termasuk WHT 2%)
-          {pkg.assignedAt && <> · aktif sejak {formatDateTime(pkg.assignedAt)}</>}
+        <CardDescription className="space-y-1.5">
+          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+            <span className="text-foreground">{billingLabel(pkg.billingPlan)}</span>
+            {price.original != null && (
+              <span className="text-sm text-muted-foreground line-through decoration-destructive/60">
+                {formatRupiah(price.original)}
+              </span>
+            )}
+            <span className="text-2xl font-semibold tracking-tight text-foreground">{formatRupiah(price.current)}</span>
+            <span className="text-sm">{price.suffix}</span>
+            {price.saving != null && (
+              <Badge variant="success">
+                Hemat {formatRupiah(price.saving)}
+                {price.badge ? ` · ${price.badge}` : ''}
+              </Badge>
+            )}
+          </div>
+          <p className="text-xs">
+            Belum termasuk WHT 2%
+            {pkg.assignedAt && <> · aktif sejak {formatDateTime(pkg.assignedAt)}</>}
+          </p>
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
