@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
-import { ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Clock, RefreshCw, UserCheck, Users } from 'lucide-react'
 import { api } from '@/api/client'
 import { formatDateTime } from '@/lib/format'
-import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import StatCard from '@/components/StatCard'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 const FILTERS = [
@@ -88,7 +88,7 @@ export default function MembersPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Member Subscription</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Member Subscription</h1>
           <p className="text-muted-foreground">Setujui akun member agar bisa mengakses dashboard.</p>
         </div>
         <Button variant="outline" onClick={reload} disabled={loading}>
@@ -98,32 +98,17 @@ export default function MembersPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <Card className="py-4">
-          <CardContent>
-            <p className="text-sm text-muted-foreground">Menunggu persetujuan</p>
-            <p className="mt-1 text-2xl font-semibold">{data.counts.pending}</p>
-          </CardContent>
-        </Card>
-        <Card className="py-4">
-          <CardContent>
-            <p className="text-sm text-muted-foreground">Member aktif</p>
-            <p className="mt-1 text-2xl font-semibold">{data.counts.active}</p>
-          </CardContent>
-        </Card>
-        <Card className="py-4">
-          <CardContent>
-            <p className="text-sm text-muted-foreground">Total member</p>
-            <p className="mt-1 text-2xl font-semibold">{total}</p>
-          </CardContent>
-        </Card>
+        <StatCard label="Menunggu persetujuan" value={data.counts.pending} icon={Clock} tone="teal" />
+        <StatCard label="Member aktif" value={data.counts.active} icon={UserCheck} tone="primary" />
+        <StatCard label="Total member" value={total} icon={Users} tone="navy" />
       </div>
 
-      <div className="flex gap-2">
+      <div className="inline-flex gap-1 rounded-xl border bg-card p-1">
         {FILTERS.map((filter) => (
           <Button
             key={filter.label}
             size="sm"
-            variant={status === filter.value ? 'default' : 'outline'}
+            variant={status === filter.value ? 'default' : 'ghost'}
             onClick={() => changeFilter(filter.value)}
           >
             {filter.label}
@@ -162,7 +147,7 @@ export default function MembersPage() {
                     <TableCell className="px-4 font-medium">{member.name}</TableCell>
                     <TableCell>{member.email}</TableCell>
                     <TableCell>
-                      <Badge variant={isActive ? 'secondary' : 'outline'} className={cn(!isActive && 'text-amber-600')}>
+                      <Badge variant={isActive ? 'success' : 'warning'}>
                         {isActive ? 'Aktif' : 'Menunggu'}
                       </Badge>
                     </TableCell>

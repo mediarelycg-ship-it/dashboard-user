@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Clock, LogOut, RefreshCw } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
 import { Button } from '@/components/ui/button'
+import Logo from '@/components/Logo'
 
 // Halaman penuh: ditampilkan selama akun member belum diaktifkan master admin
 export default function PendingApprovalPage() {
@@ -25,12 +26,13 @@ export default function PendingApprovalPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-muted/40 p-6 text-center">
-      <div className="flex size-20 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+    <div className="flex min-h-screen flex-col items-center justify-center p-6 text-center">
+      <Logo className="mb-10 h-10" />
+      <div className="flex size-20 items-center justify-center rounded-full bg-teal/15 text-teal">
         <Clock className="size-10" />
       </div>
 
-      <h1 className="mt-6 text-3xl font-bold tracking-tight">Menunggu Persetujuan</h1>
+      <h1 className="mt-6 text-3xl font-semibold tracking-tight">Menunggu Persetujuan</h1>
       <p className="mt-3 max-w-md text-muted-foreground">
         Halo{user?.name ? `, ${user.name}` : ''}. Akun Anda{user?.email ? ` (${user.email})` : ''} sudah terdaftar.
         Dashboard akan terbuka setelah master admin mengaktifkan akun Anda.

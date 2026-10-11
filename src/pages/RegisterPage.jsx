@@ -80,7 +80,7 @@ export default function RegisterPage() {
 
       <p className="mt-6 text-center text-sm text-muted-foreground">
         Sudah punya akun?{' '}
-        <Link to="/login" className="font-medium text-foreground underline-offset-4 hover:underline">
+        <Link to="/login" className="font-medium text-primary underline-offset-4 hover:underline">
           Masuk
         </Link>
       </p>
