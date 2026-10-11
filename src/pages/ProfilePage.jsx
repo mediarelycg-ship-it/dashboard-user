@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/auth-context'
 import { formatDateTime } from '@/lib/format'
 import Avatar from '@/components/Avatar'
 import AdminProfile from '@/pages/AdminProfile'
+import MyPackageCard from '@/components/MyPackageCard'
 import StatCard from '@/components/StatCard'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -96,6 +97,8 @@ function MemberProfile() {
         <StatCard label="Diaktifkan oleh" value={member?.activatedBy?.name || '-'} icon={UserCheck} tone="primary" />
         <StatCard label="Tanggal aktivasi" value={formatDateTime(member?.activatedAt)} icon={CalendarCheck} tone="navy" />
       </div>
+
+      <MyPackageCard />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>

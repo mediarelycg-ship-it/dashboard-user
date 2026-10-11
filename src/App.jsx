@@ -4,6 +4,9 @@ import AppLayout from '@/components/AppLayout'
 import HomePage from '@/pages/HomePage'
 import LoginPage from '@/pages/LoginPage'
 import MembersPage from '@/pages/MembersPage'
+import MemberDetailPage from '@/pages/MemberDetailPage'
+import PackagesPage from '@/pages/PackagesPage'
+import PackageFormPage from '@/pages/PackageFormPage'
 import PendingApprovalPage from '@/pages/PendingApprovalPage'
 import ProfilePage from '@/pages/ProfilePage'
 import RegisterPage from '@/pages/RegisterPage'
@@ -47,6 +50,10 @@ export default function App() {
             <ProfilePage />
           }
         />
+        <Route path="members/:id" element={<RequireMasterAdmin><MemberDetailPage /></RequireMasterAdmin>} />
+        <Route path="packages" element={<RequireMasterAdmin><PackagesPage /></RequireMasterAdmin>} />
+        <Route path="packages/new" element={<RequireMasterAdmin><PackageFormPage /></RequireMasterAdmin>} />
+        <Route path="packages/:id/edit" element={<RequireMasterAdmin><PackageFormPage /></RequireMasterAdmin>} />
         <Route
           path="members"
           element={

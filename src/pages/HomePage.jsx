@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { api } from '@/api/client'
 import { useAuth } from '@/contexts/auth-context'
 import { Button } from '@/components/ui/button'
+import MasterDashboard from '@/components/MasterDashboard'
 import VirtualCard from '@/components/VirtualCard'
 
 function Hero({ name, children }) {
@@ -45,6 +46,7 @@ export default function HomePage() {
             </Link>
           </Button>
         </Hero>
+        <MasterDashboard />
       </div>
     )
   }

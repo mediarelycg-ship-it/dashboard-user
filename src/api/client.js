@@ -45,6 +45,27 @@ export const api = {
   updateAdminProfile: (data) =>
     request('/auth/profile', { method: 'PUT', body: JSON.stringify(data) }),
 
+  // Paket milik member yang sedang login (hanya akun aktif)
+  getMyPackage: () => request('/members/me/package'),
+
+  getDashboard: (range = '7d') => request(`/admin/dashboard?range=${range}`),
+
+  // Paket membership (master admin)
+  getPackages: ({ activeOnly = false } = {}) =>
+    request(`/admin/packages${activeOnly ? '?activeOnly=true' : ''}`),
+  getPackage: (id) => request(`/admin/packages/${id}`),
+  createPackage: (data) =>
+    request('/admin/packages', { method: 'POST', body: JSON.stringify(data) }),
+  updatePackage: (id, data) =>
+    request(`/admin/packages/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deletePackage: (id) => request(`/admin/packages/${id}`, { method: 'DELETE' }),
+  getPackageServices: () => request('/admin/package-services'),
+  syncPackageKnowledge: () =>
+    request('/admin/packages/sync-knowledge', { method: 'POST' }),
+  getMemberDetail: (id) => request(`/admin/members/${id}`),
+  assignMemberPackage: (id, data) =>
+    request(`/admin/members/${id}/package`, { method: 'PUT', body: JSON.stringify(data) }),
+
   // Manajemen member (master admin)
   getMembers: ({ status = '', page = 1, limit = 10 } = {}) => {
     const query = new URLSearchParams({ page, limit })

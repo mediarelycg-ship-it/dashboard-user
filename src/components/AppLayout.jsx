@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
-import { ChevronsUpDown, LayoutDashboard, LogOut, UserCheck, UserCircle } from 'lucide-react'
+import { ChevronsUpDown, LayoutDashboard, LogOut, Package, UserCheck, UserCircle } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
 import {
   Sidebar,
@@ -40,7 +40,10 @@ const navGroups = [
   },
   {
     label: 'Manajemen',
-    items: [{ to: '/members', label: 'Member Subscription', icon: UserCheck, roles: ['master_admin'] }],
+    items: [
+      { to: '/members', label: 'Member Subscription', icon: UserCheck, roles: ['master_admin'] },
+      { to: '/packages', label: 'Paket', icon: Package, roles: ['master_admin'] },
+    ],
   },
 ]
 
@@ -186,7 +189,7 @@ export default function AppLayout() {
         <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b bg-background/80 px-4 backdrop-blur">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
-          <h1 className="text-sm font-medium text-muted-foreground">{current?.label || 'Member Area'}</h1>
+          <h1 className="text-sm font-medium text-muted-foreground">{current?.label || 'Portal Area'}</h1>
         </header>
         <main className="flex-1 p-4 md:p-6">
           <div className="mx-auto w-full max-w-6xl">

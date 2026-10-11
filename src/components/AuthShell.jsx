@@ -19,7 +19,7 @@ export default function AuthShell({ title, description, children }) {
 
         <div className="relative max-w-md">
           <h2 className="text-4xl leading-tight font-semibold">
-            Member Area<span className="block text-teal">{COMPANY_NAME}</span>
+            Portal Area<span className="block text-teal">{COMPANY_NAME}</span>
           </h2>
           <p className="mt-4 text-white/70">Kelola akun dan akses member Anda dengan mudah dan aman.</p>
           <ul className="mt-8 space-y-3 text-sm text-white/85">

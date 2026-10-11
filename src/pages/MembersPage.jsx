@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { ChevronLeft, ChevronRight, Clock, RefreshCw, UserCheck, Users } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { ChevronLeft, ChevronRight, Clock, Eye, RefreshCw, UserCheck, Users } from 'lucide-react'
 import { api } from '@/api/client'
 import { formatDateTime } from '@/lib/format'
 import { Badge } from '@/components/ui/badge'
@@ -126,6 +127,7 @@ export default function MembersPage() {
                 <TableHead className="px-4">Nama</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Paket</TableHead>
                 <TableHead>Terdaftar</TableHead>
                 <TableHead>Diaktifkan oleh</TableHead>
                 <TableHead>Tanggal aktivasi</TableHead>
@@ -135,7 +137,7 @@ export default function MembersPage() {
             <TableBody>
               {data.members.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
+                  <TableCell colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
                     {loading ? 'Memuat data...' : 'Belum ada member.'}
                   </TableCell>
                 </TableRow>
@@ -144,31 +146,45 @@ export default function MembersPage() {
                 const isActive = member.status === 'active'
                 return (
                   <TableRow key={member.id}>
-                    <TableCell className="px-4 font-medium">{member.name}</TableCell>
+                    <TableCell className="px-4 font-medium">
+                      <Link to={`/members/${member.id}`} className="hover:text-primary hover:underline">
+                        {member.name}
+                      </Link>
+                    </TableCell>
                     <TableCell>{member.email}</TableCell>
                     <TableCell>
                       <Badge variant={isActive ? 'success' : 'warning'}>
                         {isActive ? 'Aktif' : 'Menunggu'}
                       </Badge>
                     </TableCell>
+                    <TableCell>
+                      {member.package ? <Badge variant="secondary">{member.package.name}</Badge> : '-'}
+                    </TableCell>
                     <TableCell>{formatDateTime(member.createdAt)}</TableCell>
                     <TableCell>{member.activatedBy?.name || '-'}</TableCell>
                     <TableCell>{formatDateTime(member.activatedAt)}</TableCell>
-                    <TableCell className="px-4 text-right">
-                      {isActive ? (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          disabled={actionId === member.id}
-                          onClick={() => handleRevoke(member)}
-                        >
-                          Cabut akses
+                    <TableCell className="px-4">
+                      <div className="flex justify-end gap-2">
+                        <Button size="sm" variant="outline" asChild>
+                          <Link to={`/members/${member.id}`}>
+                            <Eye /> Detail
+                          </Link>
                         </Button>
-                      ) : (
-                        <Button size="sm" disabled={actionId === member.id} onClick={() => handleActivate(member)}>
-                          Aktifkan user
-                        </Button>
-                      )}
+                        {isActive ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={actionId === member.id}
+                            onClick={() => handleRevoke(member)}
+                          >
+                            Cabut akses
+                          </Button>
+                        ) : (
+                          <Button size="sm" disabled={actionId === member.id} onClick={() => handleActivate(member)}>
+                            Aktifkan user
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 )
