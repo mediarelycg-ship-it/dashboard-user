@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import { Bot, History, Loader2, Lock, MessageSquarePlus, Send } from 'lucide-react'
+import { ArrowUp, History, Loader2, Lock, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { api } from '@/api/client'
 import { useAuth } from '@/contexts/auth-context'
 import { renderMarkdown } from '@/lib/markdown'
 import { cn } from '@/lib/utils'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
@@ -23,110 +22,110 @@ function timeAgo(value) {
   return new Date(value).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
 }
 
+function formatTime(value) {
+  return new Date(value).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+}
+
 function LockedView() {
   return (
-    <Card className="mx-auto mt-10 max-w-lg">
-      <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
-        <span className="flex size-14 items-center justify-center rounded-full bg-muted text-muted-foreground">
-          <Lock className="size-7" />
-        </span>
-        <h1 className="text-xl font-semibold tracking-tight">Agent belum aktif</h1>
-        <p className="max-w-sm text-sm text-muted-foreground">
-          Agent hanya tersedia untuk member yang sudah berlangganan paket. Hubungi admin untuk mengaktifkan
-          langganan Anda, lalu fitur ini akan terbuka otomatis.
-        </p>
-      </CardContent>
-    </Card>
+    <div className="p-4 md:p-6">
+      <Card className="mx-auto mt-10 max-w-lg">
+        <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
+          <span className="flex size-14 items-center justify-center rounded-full bg-muted text-muted-foreground">
+            <Lock className="size-7" />
+          </span>
+          <h1 className="text-xl font-semibold tracking-tight">Agent belum aktif</h1>
+          <p className="max-w-sm text-sm text-muted-foreground">
+            Agent hanya tersedia untuk member yang sudah berlangganan paket. Hubungi admin untuk mengaktifkan
+            langganan Anda, lalu fitur ini akan terbuka otomatis.
+          </p>
+        </CardContent>
+      </Card>
+    </div>
   )
 }
 
+// Daftar riwayat: teks saja, menempel ke sidebar utama
 function SessionPanel({ sessions, activeId, creating, newDisabled, onSelect, onNew }) {
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex items-center justify-between gap-2 border-b px-4 py-3">
-        <p className="text-sm font-semibold">Riwayat</p>
-        <Button
-          size="sm"
+      <div className="p-3">
+        <button
+          type="button"
           onClick={onNew}
           disabled={creating || newDisabled}
           title={newDisabled ? 'Gunakan percakapan kosong yang sudah ada' : undefined}
+          className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent"
         >
-          {creating ? <Loader2 className="animate-spin" /> : <MessageSquarePlus />} Baru
-        </Button>
+          {creating ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
+          Percakapan baru
+        </button>
       </div>
-      {newDisabled && (
-        <p className="border-b bg-muted/40 px-4 py-2 text-xs text-muted-foreground">
-          Masih ada percakapan kosong. Kirim pertanyaan di sana sebelum membuat yang baru.
-        </p>
-      )}
-      <div className="min-h-0 flex-1 overflow-y-auto">
+
+      <p className="px-6 pb-1 text-xs font-medium text-muted-foreground">Riwayat</p>
+      <div className="min-h-0 flex-1 space-y-0.5 overflow-y-auto px-3 pb-3">
         {sessions.length === 0 ? (
-          <p className="px-4 py-8 text-center text-sm text-muted-foreground">Belum ada percakapan.</p>
+          <p className="px-3 py-6 text-sm text-muted-foreground">Belum ada percakapan.</p>
         ) : (
           sessions.map((s) => (
             <button
               key={s.sessionId}
               type="button"
               onClick={() => onSelect(s.sessionId)}
+              title={`${s.messageCount ?? 0} pesan · ${timeAgo(s.updatedAt)}`}
               className={cn(
-                'w-full cursor-pointer border-b border-l-[3px] px-4 py-3 text-left transition-colors hover:bg-accent',
-                activeId === s.sessionId ? 'border-l-primary bg-primary/5' : 'border-l-transparent'
+                'block w-full cursor-pointer truncate rounded-lg px-3 py-2 text-left text-sm transition-colors',
+                activeId === s.sessionId ? 'bg-accent font-medium text-primary' : 'hover:bg-muted'
               )}
             >
-              <p className="truncate text-sm font-medium">{s.title || 'Percakapan baru'}</p>
-              <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                {s.messageCount ?? 0} pesan · {timeAgo(s.updatedAt)}
-              </p>
+              {s.title || 'Percakapan baru'}
             </button>
           ))
         )}
       </div>
+
+      {newDisabled && (
+        <p className="shrink-0 border-t px-6 py-3 text-xs text-muted-foreground">
+          Masih ada percakapan kosong. Kirim pertanyaan di sana sebelum membuat yang baru.
+        </p>
+      )}
     </div>
   )
 }
 
 function Bubble({ message }) {
-  const isUser = message.role === 'user'
-  return (
-    <div className={cn('flex gap-2.5', isUser ? 'justify-end' : 'justify-start')}>
-      {!isUser && (
-        <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-          <Bot className="size-4" />
-        </span>
-      )}
-      <div className="max-w-[85%] md:max-w-[75%]">
-        <div
-          className={cn(
-            'rounded-2xl px-4 py-2.5 text-sm leading-relaxed',
-            isUser ? 'rounded-br-md bg-primary text-primary-foreground' : 'rounded-bl-md border bg-card shadow-xs'
-          )}
-          dangerouslySetInnerHTML={{ __html: renderMarkdown(message.content) }}
-        />
-        {message.createdAt && (
-          <p className={cn('mt-1 px-1 text-[10px] text-muted-foreground', isUser && 'text-right')}>
-            {new Date(message.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
-          </p>
-        )}
+  if (message.role === 'user') {
+    return (
+      <div className="flex flex-col items-end">
+        <div className="max-w-[85%] rounded-2xl bg-muted px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap md:max-w-[75%] md:text-[15px]">
+          {message.content}
+        </div>
+        {message.createdAt && <p className="mt-1 px-1 text-[11px] text-muted-foreground">{formatTime(message.createdAt)}</p>}
       </div>
+    )
+  }
+  // Balasan agent: teks polos tanpa gelembung agar nyaman dibaca
+  return (
+    <div>
+      <div
+        className="text-sm leading-relaxed break-words md:text-[15px] [&_a]:[overflow-wrap:anywhere] [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2"
+        dangerouslySetInnerHTML={{ __html: renderMarkdown(message.content) }}
+      />
+      {message.createdAt && <p className="mt-1.5 text-[11px] text-muted-foreground">{formatTime(message.createdAt)}</p>}
     </div>
   )
 }
 
 function TypingIndicator() {
   return (
-    <div className="flex items-center gap-2.5">
-      <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-        <Bot className="size-4" />
-      </span>
-      <div className="flex gap-1 rounded-2xl rounded-bl-md border bg-card px-4 py-3 shadow-xs" aria-label="Agent sedang mengetik">
-        {[0, 150, 300].map((delay) => (
-          <span
-            key={delay}
-            className="size-1.5 animate-bounce rounded-full bg-muted-foreground/60"
-            style={{ animationDelay: `${delay}ms` }}
-          />
-        ))}
-      </div>
+    <div className="flex gap-1 py-2" aria-label="Agent sedang mengetik">
+      {[0, 150, 300].map((delay) => (
+        <span
+          key={delay}
+          className="size-1.5 animate-bounce rounded-full bg-muted-foreground/60"
+          style={{ animationDelay: `${delay}ms` }}
+        />
+      ))}
     </div>
   )
 }
@@ -295,48 +294,34 @@ export default function AgentPage() {
   )
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Agent</h1>
-        <p className="text-sm text-muted-foreground">Tanya seputar layanan RELY Group dan paket Anda. Percakapan tersimpan di riwayat.</p>
-      </div>
+    <div className="flex h-[calc(100dvh-3.5rem)] min-h-0">
+      <aside className="hidden w-64 shrink-0 border-r bg-background lg:block xl:w-72">{panel}</aside>
 
-      <div className="flex h-[calc(100svh-12rem)] min-h-[460px] overflow-hidden rounded-xl border bg-card shadow-xs">
-        <aside className="hidden w-72 shrink-0 border-r md:block">{panel}</aside>
+      <section className="flex min-w-0 flex-1 flex-col bg-card">
+        {/* Tombol riwayat untuk layar kecil */}
+        <div className="flex h-11 shrink-0 items-center gap-2 border-b px-3 lg:hidden">
+          <Button variant="ghost" size="sm" onClick={() => setListOpen(true)}>
+            <History /> Riwayat
+          </Button>
+          <p className="min-w-0 flex-1 truncate text-right text-xs text-muted-foreground">{active?.title}</p>
+        </div>
 
-        <section className="flex min-w-0 flex-1 flex-col">
-          {!active ? (
-            <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
-              <span className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                <Bot className="size-7" />
-              </span>
-              <div>
-                <h2 className="text-lg font-semibold">Mulai percakapan</h2>
-                <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-                  Tanyakan apa saja seputar RELY Consulting Group, Law Rely, Kakera, dan paket langganan Anda.
-                </p>
-              </div>
-              <Button disabled={creating || hasEmptySession} onClick={newConversation}>
-                {creating ? <Loader2 className="animate-spin" /> : <MessageSquarePlus />} Mulai percakapan baru
-              </Button>
-              <Button variant="ghost" size="sm" className="md:hidden" onClick={() => setListOpen(true)}>
-                <History /> Lihat riwayat
-              </Button>
+        {!active ? (
+          <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
+            <div>
+              <h1 className="text-xl font-semibold tracking-tight">Ada yang bisa dibantu?</h1>
+              <p className="mt-1.5 max-w-sm text-sm text-muted-foreground">
+                Tanyakan seputar RELY Consulting Group, Law Rely, Kakera, dan paket langganan Anda.
+              </p>
             </div>
-          ) : (
-            <>
-              <header className="flex shrink-0 items-center gap-3 border-b px-4 py-3">
-                <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setListOpen(true)} aria-label="Riwayat">
-                  <History />
-                </Button>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold">{active.title || 'Percakapan baru'}</p>
-                  <p className="truncate text-xs text-muted-foreground">Semua layanan RELY Group</p>
-                </div>
-                <Badge variant="info">Member</Badge>
-              </header>
-
-              <div className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-muted/30 px-4 py-4 md:px-6">
+            <Button disabled={creating || hasEmptySession} onClick={newConversation}>
+              {creating ? <Loader2 className="animate-spin" /> : <Plus />} Percakapan baru
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+              <div className="mx-auto w-full max-w-3xl space-y-7 px-4 py-6 md:px-6 md:py-8">
                 {active.loading ? (
                   <div className="flex items-center justify-center gap-2 py-16 text-sm text-muted-foreground">
                     <Loader2 className="size-4 animate-spin" /> Memuat percakapan...
@@ -346,13 +331,13 @@ export default function AgentPage() {
                 )}
                 {sending && <TypingIndicator />}
                 {!sending && suggestions.length > 0 && (
-                  <div className="flex flex-wrap gap-2 pl-10">
+                  <div className="flex flex-wrap gap-2">
                     {suggestions.map((q) => (
                       <button
                         key={q}
                         type="button"
                         onClick={() => send(q)}
-                        className="cursor-pointer rounded-full border bg-card px-3 py-1.5 text-left text-xs text-primary transition-colors hover:bg-accent"
+                        className="cursor-pointer rounded-full border px-3 py-1.5 text-left text-xs transition-colors hover:border-primary/40 hover:bg-accent hover:text-primary"
                       >
                         {q}
                       </button>
@@ -361,35 +346,43 @@ export default function AgentPage() {
                 )}
                 <div ref={endRef} />
               </div>
+            </div>
 
-              <form
-                className="flex shrink-0 items-end gap-2 border-t p-3"
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  send(input)
-                }}
-              >
+            <form
+              className="shrink-0 px-4 pt-2 pb-4 md:px-6"
+              onSubmit={(e) => {
+                e.preventDefault()
+                send(input)
+              }}
+            >
+              <div className="mx-auto flex w-full max-w-3xl items-end gap-2 rounded-3xl bg-muted py-2 pr-2 pl-4 transition-shadow focus-within:ring-[3px] focus-within:ring-ring/20">
                 <Textarea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={onKeyDown}
                   rows={1}
                   maxLength={2000}
-                  placeholder="Tulis pertanyaan Anda... (Enter untuk kirim, Shift+Enter baris baru)"
-                  className="max-h-32 min-h-10 resize-none"
+                  placeholder="Tulis pertanyaan Anda..."
+                  className="max-h-40 min-h-9 resize-none border-0 bg-transparent px-0 py-1.5 shadow-none focus-visible:ring-0"
                   disabled={active.loading}
                 />
-                <Button type="submit" size="icon" disabled={sending || active.loading || !input.trim()} aria-label="Kirim">
-                  {sending ? <Loader2 className="animate-spin" /> : <Send />}
+                <Button
+                  type="submit"
+                  size="icon"
+                  className="size-9 shrink-0 rounded-full"
+                  disabled={sending || active.loading || !input.trim()}
+                  aria-label="Kirim"
+                >
+                  {sending ? <Loader2 className="animate-spin" /> : <ArrowUp />}
                 </Button>
-              </form>
-            </>
-          )}
-        </section>
-      </div>
+              </div>
+            </form>
+          </>
+        )}
+      </section>
 
       <Sheet open={listOpen} onOpenChange={setListOpen}>
-        <SheetContent side="left" className="w-80 p-0">
+        <SheetContent side="left" className="w-80 max-w-[85vw] bg-background p-0">
           <SheetHeader className="sr-only">
             <SheetTitle>Riwayat percakapan</SheetTitle>
             <SheetDescription>Daftar percakapan Agent Anda</SheetDescription>

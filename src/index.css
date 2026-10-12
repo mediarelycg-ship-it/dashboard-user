@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Aplikasi hanya punya tema terang: varian dark: baru aktif bila ada class .dark,
+   bukan mengikuti pengaturan gelap di OS (sebelumnya bikin input/komponen berubah warna). */
+@custom-variant dark (&:is(.dark *));
+
 @theme inline {
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);

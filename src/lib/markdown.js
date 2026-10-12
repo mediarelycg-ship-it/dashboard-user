@@ -14,6 +14,8 @@ export function renderMarkdown(text) {
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
     .replace(/`(.+?)`/g, '<code style="background:rgba(127,127,127,.18);padding:1px 6px;border-radius:4px;font-size:13px;font-family:monospace">$1</code>')
     .replace(/~~(.+?)~~/g, '<del>$1</del>')
+    // URL otomatis jadi tautan (teks sudah di-escape; tanda baca di ujung tidak ikut)
+    .replace(/(https?:\/\/[^\s<]+?)([.,;:!?)]*)(?=\s|$|<)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>$2')
 
   // Step 3: Process line by line
   const lines = safe.split('\n')

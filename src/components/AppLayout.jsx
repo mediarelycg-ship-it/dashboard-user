@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { Bot, ChevronsUpDown, LayoutDashboard, Lock, LogOut, Package, UserCheck, UserCircle } from 'lucide-react'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 import { useAuth } from '@/contexts/auth-context'
 import {
   Sidebar,
@@ -177,6 +178,7 @@ export default function AppLayout() {
   const { user, refreshStatus } = useAuth()
   const { pathname } = useLocation()
   const isMember = user?.role === 'member'
+  const fullBleed = isActive(pathname, '/agent')
 
   // Ambil nama/foto terbaru (mis. foto Google yang baru tersimpan di server)
   useEffect(() => {
@@ -220,10 +222,15 @@ export default function AppLayout() {
           <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
           <h1 className="text-sm font-medium text-muted-foreground">{current?.label || 'Portal Area'}</h1>
         </header>
-        <main className="flex-1 p-4 md:p-6">
-          <div className="mx-auto w-full max-w-6xl">
+        {/* Halaman Agent full-bleed agar daftar riwayat menempel ke sidebar */}
+        <main className={cn('flex-1', !fullBleed && 'p-4 md:p-6')}>
+          {fullBleed ? (
             <Outlet />
-          </div>
+          ) : (
+            <div className="mx-auto w-full max-w-6xl">
+              <Outlet />
+            </div>
+          )}
         </main>
       </SidebarInset>
     </SidebarProvider>
