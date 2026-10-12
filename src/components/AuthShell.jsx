@@ -1,4 +1,5 @@
 import { CheckCircle2 } from 'lucide-react'
+import ThemeToggle from '@/components/ThemeToggle'
 import Logo, { Brand, COMPANY_NAME } from '@/components/Logo'
 
 const highlights = ['Daftar dengan email atau akun Google', 'Akses dibuka setelah disetujui master admin', 'Satu dashboard untuk semua layanan']
@@ -35,7 +36,8 @@ export default function AuthShell({ title, description, children }) {
         <p className="relative text-xs text-white/50">&copy; {new Date().getFullYear()} {COMPANY_NAME}. All rights reserved.</p>
       </aside>
 
-      <main className="flex items-center justify-center bg-card p-6 sm:p-10">
+      <main className="relative flex items-center justify-center bg-card p-6 sm:p-10">
+        <ThemeToggle className="absolute top-4 right-4" />
         <div className="w-full max-w-sm">
           <Brand size="md" className="mb-8 lg:hidden" />
           <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>

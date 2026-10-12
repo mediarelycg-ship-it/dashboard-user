@@ -1,8 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* Aplikasi hanya punya tema terang: varian dark: baru aktif bila ada class .dark,
-   bukan mengikuti pengaturan gelap di OS (sebelumnya bikin input/komponen berubah warna). */
+/* Varian dark: hanya aktif bila <html> punya class .dark (diatur lewat tombol tema / pilihan tersimpan),
+   bukan langsung mengikuti pengaturan gelap di OS. */
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -76,6 +76,38 @@
   --sidebar-accent-foreground: #0852aa;
   --sidebar-border: #e3e8f0;
   --sidebar-ring: #0852aa;
+}
+
+.dark {
+  --background: #0e121b;
+  --foreground: #e6eaf2;
+  --card: #161b27;
+  --card-foreground: #e6eaf2;
+  --popover: #1a2030;
+  --popover-foreground: #e6eaf2;
+  --primary: #2f7bd6;
+  --primary-foreground: #ffffff;
+  --secondary: #1b2a42;
+  --secondary-foreground: #a9cdf7;
+  --muted: #1c2332;
+  --muted-foreground: #98a3b6;
+  --accent: #1b2a42;
+  --accent-foreground: #a9cdf7;
+  --destructive: #ef4444;
+  --success: #3ccf80;
+  --warning: #f5a524;
+  --teal: #2cc4c4;
+  --border: #263042;
+  --input: #2d384c;
+  --ring: #4a90e2;
+  --sidebar: #121724;
+  --sidebar-foreground: #e6eaf2;
+  --sidebar-primary: #2f7bd6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1d2638;
+  --sidebar-accent-foreground: #a9cdf7;
+  --sidebar-border: #232c3d;
+  --sidebar-ring: #4a90e2;
 }
 
 /* Tailwind v4: tanpa ini border memakai warna teks (hitam) */

@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 const TONES = {
   primary: 'bg-primary/10 text-primary',
   teal: 'bg-teal/15 text-teal',
-  navy: 'bg-navy/10 text-navy',
+  navy: 'bg-navy/10 text-navy dark:bg-white/10 dark:text-foreground',
 }
 
 export default function StatCard({ label, value, icon: Icon, tone = 'primary' }) {

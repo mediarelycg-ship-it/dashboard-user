@@ -4,7 +4,7 @@ export const COMPANY_NAME = 'Rely Consulting Group'
 
 // Logo "R" RELY; file sudah di-crop dari logo1.png (tanpa margin kosong)
 export default function Logo({ className }) {
-  return <img src="/logo-r.png" alt="RELY" className={cn('h-8 w-auto', className)} />
+  return <img src="/logo-r.png" alt="RELY" className={cn('h-8 w-auto dark:rounded-md dark:bg-white dark:p-1', className)} />
 }
 
 const SIZES = {

@@ -7,6 +7,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script>
+      // Pasang tema tersimpan sebelum render agar tidak berkedip terang saat memuat
+      try {
+        var t = localStorage.getItem('theme')
+        if (t !== 'light' && t !== 'dark') t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        if (t === 'dark') document.documentElement.classList.add('dark')
+        document.documentElement.style.colorScheme = t
+      } catch (e) {}
+    </script>
     <title>Rely Consulting Group</title>
   </head>
   <body>

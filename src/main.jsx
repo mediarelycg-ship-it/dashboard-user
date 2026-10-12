@@ -6,6 +6,7 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import { Toaster } from '@/components/ui/sonner'
 import ConfirmHost from '@/components/ConfirmHost'
 import App from './App.jsx'
+import './lib/theme'
 import './index.css'
 
 createRoot(document.getElementById('root')).render(

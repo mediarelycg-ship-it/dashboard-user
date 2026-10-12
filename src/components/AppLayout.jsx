@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/sidebar'
 import { Separator } from '@/components/ui/separator'
 import { assetUrl } from '@/api/client'
+import ThemeToggle from '@/components/ThemeToggle'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -221,6 +222,7 @@ export default function AppLayout() {
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
           <h1 className="text-sm font-medium text-muted-foreground">{current?.label || 'Portal Area'}</h1>
+          <ThemeToggle className="ml-auto" />
         </header>
         {/* Halaman Agent full-bleed agar daftar riwayat menempel ke sidebar */}
         <main className={cn('flex-1', !fullBleed && 'p-4 md:p-6')}>
