@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Clock, Lock, Package as PackageIcon, Save, UserCheck, UserX } from 'lucide-react'
-import { api } from '@/api/client'
+import { api, assetUrl } from '@/api/client'
 import { formatDateTime, formatRupiah } from '@/lib/format'
 import { BILLING_PLANS, billingLabel, planPrice, typeLabel } from '@/lib/packages'
 import { showConfirm, showError, showSuccess } from '@/utils/alert'
@@ -65,7 +65,7 @@ export default function MemberDetailPage() {
     (packageId === NONE || billingPlan === member.billingPlan)
 
   const savePackage = async () => {
-    if (packageId === NONE) return
+    if (packageId === NONE || !isActive) return
     setSaving(true)
     try {
       applyMember(await api.assignMemberPackage(id, { packageId: Number(packageId), billingPlan }))
@@ -141,7 +141,7 @@ export default function MemberDetailPage() {
           <CardContent>
             <div className="mb-4 flex items-center gap-3">
               <Avatar className="size-14">
-                <AvatarImage src={member.picture || undefined} alt={member.name} referrerPolicy="no-referrer" />
+                <AvatarImage src={assetUrl(member.picture) || undefined} alt={member.name} referrerPolicy="no-referrer" />
                 <AvatarFallback className="bg-primary text-lg font-semibold text-primary-foreground">
                   {member.name.trim().charAt(0).toUpperCase()}
                 </AvatarFallback>
@@ -174,8 +174,14 @@ export default function MemberDetailPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {!isActive && (
+              <p className="rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm text-foreground">
+                Member belum diaktifkan, jadi paket belum bisa di-assign. Aktifkan member terlebih dahulu.
+              </p>
+            )}
+
             <FormField label="Paket" htmlFor="package">
-              <Select value={packageId} onValueChange={setPackageId}>
+              <Select value={packageId} onValueChange={setPackageId} disabled={!isActive}>
                 <SelectTrigger id="package" className="w-full"><SelectValue placeholder="Pilih paket" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value={NONE} disabled>Pilih paket...</SelectItem>
@@ -187,7 +193,7 @@ export default function MemberDetailPage() {
             </FormField>
 
             <FormField label="Billing plan" htmlFor="billingPlan">
-              <Select value={billingPlan} onValueChange={setBillingPlan} disabled={!selected}>
+              <Select value={billingPlan} onValueChange={setBillingPlan} disabled={!selected || !isActive}>
                 <SelectTrigger id="billingPlan" className="w-full"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {BILLING_PLANS.map((b) => {
@@ -218,7 +224,7 @@ export default function MemberDetailPage() {
             )}
 
             <div className="flex flex-wrap gap-2">
-              <Button onClick={savePackage} disabled={saving || packageId === NONE || unchanged}>
+              <Button onClick={savePackage} disabled={saving || !isActive || packageId === NONE || unchanged}>
                 <Save /> {member.package ? 'Ubah paket' : 'Assign paket'}
               </Button>
               {member.package && (

@@ -21,6 +21,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 import { Separator } from '@/components/ui/separator'
+import { assetUrl } from '@/api/client'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -77,7 +78,7 @@ function UserMenu() {
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton size="lg" className="data-[state=open]:bg-sidebar-accent">
               <Avatar className="size-8 rounded-lg">
-                <AvatarImage src={user?.picture || undefined} alt={user?.name} referrerPolicy="no-referrer" />
+                <AvatarImage src={assetUrl(user?.picture) || undefined} alt={user?.name} referrerPolicy="no-referrer" />
                 <AvatarFallback className="rounded-lg bg-primary text-xs font-semibold text-primary-foreground">
                   {initials(user?.name)}
                 </AvatarFallback>

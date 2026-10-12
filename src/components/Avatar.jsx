@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
+import { assetUrl } from '@/api/client'
 
 // Foto profil (mis. dari Google); jika tidak ada atau gagal dimuat, tampilkan inisial nama
 export default function Avatar({ name, picture, className }) {
@@ -8,7 +9,7 @@ export default function Avatar({ name, picture, className }) {
   if (picture && !failed) {
     return (
       <img
-        src={picture}
+        src={assetUrl(picture)}
         alt={name || 'Foto profil'}
         referrerPolicy="no-referrer"
         onError={() => setFailed(true)}

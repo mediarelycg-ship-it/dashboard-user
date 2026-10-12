@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '@/api/client'
 import { useAuth } from '@/contexts/auth-context'
-import Avatar from '@/components/Avatar'
+import ProfilePhoto from '@/components/ProfilePhoto'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -12,6 +12,7 @@ export default function AdminProfile() {
   const { user, syncMember } = useAuth()
   const [email, setEmail] = useState(user?.email || '')
   const [name, setName] = useState(user?.name || '')
+  const [picture, setPicture] = useState(user?.picture || null)
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [message, setMessage] = useState(null)
@@ -23,6 +24,7 @@ export default function AdminProfile() {
       .then((me) => {
         setEmail(me.email)
         setName(me.name)
+        setPicture(me.picture || null)
       })
       .catch((err) => setMessage({ ok: false, text: err.message }))
   }, [])
@@ -39,7 +41,7 @@ export default function AdminProfile() {
       const data = { name }
       if (password) data.password = password
       const updated = await api.updateAdminProfile(data)
-      syncMember({ ...updated, picture: null })
+      syncMember({ ...updated, picture: updated.picture ?? picture })
       setPassword('')
       setConfirmPassword('')
       setMessage({ ok: true, text: 'Profil berhasil diperbarui.' })
@@ -52,8 +54,22 @@ export default function AdminProfile() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Avatar name={name} className="size-16 text-2xl" />
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+        <ProfilePhoto
+          name={name}
+          picture={picture}
+          isCustom={Boolean(picture)}
+          onUpload={async (file) => {
+            const updated = await api.uploadAdminPicture(file)
+            setPicture(updated.picture)
+            syncMember(updated)
+          }}
+          onRemove={async () => {
+            const updated = await api.deleteAdminPicture()
+            setPicture(null)
+            syncMember(updated)
+          }}
+        />
         <div className="min-w-0">
           <h1 className="truncate text-2xl font-semibold tracking-tight">{name}</h1>
           <p className="truncate text-muted-foreground">{email} · Master Admin</p>

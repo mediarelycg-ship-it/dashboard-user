@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { assetUrl } from '@/api/client'
 import {
   Brain,
   Clock,
@@ -157,7 +158,7 @@ function PendingCard({ members, total, links, onActivate }) {
             {members.map((m) => (
               <li key={m.id} className="flex flex-wrap items-center gap-3 py-3 first:pt-0 last:pb-0">
                 <Avatar className="size-9">
-                  <AvatarImage src={m.picture || undefined} alt={m.name} referrerPolicy="no-referrer" />
+                  <AvatarImage src={assetUrl(m.picture) || undefined} alt={m.name} referrerPolicy="no-referrer" />
                   <AvatarFallback className="bg-primary text-xs font-semibold text-primary-foreground">
                     {m.name.trim().charAt(0).toUpperCase()}
                   </AvatarFallback>

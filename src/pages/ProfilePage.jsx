@@ -3,7 +3,7 @@ import { CalendarCheck, ShieldCheck, UserCheck } from 'lucide-react'
 import { api } from '@/api/client'
 import { useAuth } from '@/contexts/auth-context'
 import { formatDateTime } from '@/lib/format'
-import Avatar from '@/components/Avatar'
+import ProfilePhoto from '@/components/ProfilePhoto'
 import AdminProfile from '@/pages/AdminProfile'
 import MyPackageCard from '@/components/MyPackageCard'
 import MyPackageHistory from '@/components/MyPackageHistory'
@@ -83,8 +83,15 @@ function MemberProfile() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Avatar name={member?.name || user?.name} picture={member?.picture || user?.picture} className="size-16 text-2xl" />
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+        <ProfilePhoto
+          name={member?.name || user?.name}
+          picture={member ? member.picture : user?.picture}
+          isCustom={member?.pictureSource === 'custom'}
+          googleFallback={Boolean(member?.googlePicture)}
+          onUpload={async (file) => applyUpdated(await api.uploadMyPicture(file))}
+          onRemove={async () => applyUpdated(await api.deleteMyPicture())}
+        />
         <div className="min-w-0">
           <h1 className="truncate text-2xl font-semibold tracking-tight">{member?.name || user?.name}</h1>
           <p className="truncate text-muted-foreground">{member?.email || user?.email}</p>

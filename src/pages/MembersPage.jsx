@@ -6,6 +6,7 @@ import { formatDateTime } from '@/lib/format'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import Avatar from '@/components/Avatar'
 import FilterBar from '@/components/FilterBar'
 import StatCard from '@/components/StatCard'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -195,7 +196,8 @@ export default function MembersPage() {
                 return (
                   <TableRow key={member.id}>
                     <TableCell className="px-4 font-medium">
-                      <Link to={`/members/${member.id}`} className="hover:text-primary hover:underline">
+                      <Link to={`/members/${member.id}`} className="flex items-center gap-3 hover:text-primary hover:underline">
+                        <Avatar name={member.name} picture={member.picture} className="size-8 text-xs" />
                         {member.name}
                       </Link>
                     </TableCell>

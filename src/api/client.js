@@ -1,20 +1,37 @@
-const API_BASE = `${import.meta.env.VITE_API_URL || ''}/api`
+const API_ORIGIN = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '')
+const API_BASE = `${API_ORIGIN}/api`
+
+// Foto upload disimpan sebagai path relatif (/uploads/...); foto Google sudah berupa URL penuh
+export const assetUrl = (path) => {
+  if (!path) return ''
+  if (/^(https?:|blob:|data:)/i.test(path)) return path
+  return `${API_ORIGIN}${path.startsWith('/') ? '' : '/'}${path}`
+}
 
 function getToken() {
-  return localStorage.getItem('token')
+  return sessionStorage.getItem('token')
 }
 
 async function request(path, options = {}) {
   const token = getToken()
-  const headers = { 'Content-Type': 'application/json', ...options.headers }
+  // FormData (upload file) harus menentukan Content-Type multipart sendiri
+  const isForm = options.body instanceof FormData
+  const headers = { ...(isForm ? {} : { 'Content-Type': 'application/json' }), ...options.headers }
   if (token) headers.Authorization = `Bearer ${token}`
 
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers })
+  let res
+  try {
+    res = await fetch(`${API_BASE}${path}`, { ...options, headers })
+  } catch {
+    throw new Error('Tidak dapat terhubung ke server. Periksa koneksi internet Anda atau coba lagi nanti.')
+  }
   const data = await res.json().catch(() => ({}))
 
-  if (res.status === 401 && token) {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
+  // Login/Google memakai 401 untuk kredensial salah: tampilkan pesan servernya, jangan anggap sesi berakhir
+  const isLoginRequest = path === '/members/login' || path === '/members/google'
+  if (res.status === 401 && token && !isLoginRequest) {
+    sessionStorage.removeItem('token')
+    sessionStorage.removeItem('user')
     window.location.href = '/login'
     throw new Error('Sesi berakhir, silakan login ulang.')
   }
@@ -41,8 +58,22 @@ export const api = {
   updateMe: (data) =>
     request('/members/me', { method: 'PUT', body: JSON.stringify(data) }),
 
+  // Foto profil member: upload sendiri, atau hapus untuk kembali ke foto Google
+  uploadMyPicture: (file) => {
+    const body = new FormData()
+    body.append('image', file)
+    return request('/members/me/picture', { method: 'POST', body })
+  },
+  deleteMyPicture: () => request('/members/me/picture', { method: 'DELETE' }),
+
   // Profil master admin (endpoint admin yang sudah ada)
   getAdminProfile: () => request('/auth/me'),
+  uploadAdminPicture: (file) => {
+    const body = new FormData()
+    body.append('image', file)
+    return request('/auth/profile/picture', { method: 'POST', body })
+  },
+  deleteAdminPicture: () => request('/auth/profile/picture', { method: 'DELETE' }),
   updateAdminProfile: (data) =>
     request('/auth/profile', { method: 'PUT', body: JSON.stringify(data) }),
 
